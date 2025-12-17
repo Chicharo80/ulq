@@ -1,918 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VISITASULQ — Control de Acceso QR</title>
-<!-- favicon/icono "D" inline (SVG base64) -->
-<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNjQnIGhlaWdodD0nNjQnIHZpZXdCb3g9JzAgMCA2NCA2NCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48cmVjdCB3aWR0aD0nNjQnIGhlaWdodD0nNjQnIGZpbGw9JyM2YTFiOWEnIHJ4PScxNycvPjx0ZXh0IHg9JzMwJyB5PSc0MCcgc3R5bGU9J2ZpbGw6I2ZmZjtmb250LXNpemU6MzJweDtmb250LXdlaWdodDpib2xkO2ZvbnQtZmFtaWx5OkFyaWFsLCBIZWx2ZXRpY2E7Jz5EPF90ZXh0PjwvdGV4dD48L3N2Zz4=">
 
 <style>
-  :root{
-    --scale:1.0;
-    --bg:#f3f7fb;
-    --card:#fff;
-    --muted:#2d3e46;
-    --primary:#6a1b9a; /* morado principal */
-    --accent:#5e35b1;
-    --time-color:#0d47a1;
-    --whatsapp:#25D366;
-    --danger:#c62828;
-    --btn-morado:#6a1b9a;
-  }
-  html,body{
-    margin:0; padding:0;
-    background:var(--bg);
-    font-family:Arial,Helvetica,sans-serif;
-    color:var(--muted);
-    -webkit-text-size-adjust:none;
-  }
-  .wrap{ max-width:820px; margin:12px auto; padding:12px; }
-  .card{
-    background:var(--card);
-    border-radius:12px;
-    padding:18px;
-    box-shadow:0 8px 30px rgba(10,30,50,0.06);
-    position:relative;
-  }
-  h1{
-    text-align:center;
-    color:var(--primary);
-    margin:0 0 12px 0;
-    font-size:20px;
-  }
-  label.small{
-    font-size:14px;
-    color:var(--muted);
-    margin-top:8px;
-    display:block;
-  }
-  input[type="text"], input[type="tel"], input[type="datetime-local"]{
-    width:100%;
-    padding:12px;
-    border-radius:12px;
-    border:2px solid #e9f3fb;
-    font-size:16px;
-    box-sizing:border-box;
-    text-transform:uppercase;
-  }
-  .grid3{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-    margin-top:10px;
-  }
-  .chip{
-    padding:12px;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:15px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    color:white;
-    font-weight:700;
-    user-select:none;
-  }
-  .chip.disabled{opacity:0.55; pointer-events:none; filter:grayscale(0.02);}
-  .dur{
-    padding:10px;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:14px;
-    text-align:center;
-    background:#e0f2ff;
-    color:var(--time-color);
-    font-weight:700;
-    user-select:none;
-  }
-  .dur.disabled{opacity:0.55; pointer-events:none;}
-  .active{
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
-    transform:translateY(-2px);
-  }
-  .btn-primary{
-    display:block;
-    width:100%;
-    padding:12px;
-    border-radius:12px;
-    background:var(--primary);
-    color:white;
-    border:none;
-    font-size:16px;
-    margin-top:12px;
-    cursor:pointer;
-    font-weight:800;
-  }
-  .btn-primary.disabled{background:#9fb9d7; cursor:default;}
-  .btn-secondary{
-    padding:10px;
-    border-radius:12px;
-    background:#f0f4f7;
-    border:none;
-    font-size:14px;
-    cursor:pointer;
-  }
-  .btn-whatsapp{
-    display:block;
-    width:100%;
-    padding:12px;
-    border-radius:12px;
-    background:var(--whatsapp);
-    color:white;
-    border:none;
-    font-size:15px;
-    margin-top:10px;
-    cursor:pointer;
-    font-weight:800;
-  }
-  .btn-danger{
-    display:block;
-    padding:8px 10px;
-    border-radius:10px;
-    background:var(--danger);
-    color:white;
-    border:none;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
-  }
-  .btn-morado{
-    background:var(--btn-morado);
-    color:white;
-    border:none;
-    padding:10px 12px;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:800;
-  }
-  .hidden{display:none !important;}
-  .qr img{
-    width:220px;
-    height:220px;
-    border-radius:12px;
-    display:block;
-    margin:8px auto;
-  }
-  .msg{
-    margin-top:10px;
-    font-size:15px;
-    color:var(--muted);
-    min-height:28px;
-    text-align:center;
-  }
-  .msg.err{color:#b00020;}
-  .codes-table{margin-top:12px; font-size:14px;}
-  .codes-table table{width:100%; border-collapse:collapse;}
-  .codes-table th{
-    text-align:left;
-    color:var(--primary);
-    padding:8px 6px;
-    border-bottom:2px solid #e6eef8;
-  }
-  .codes-table td{
-    padding:8px 6px;
-    border-bottom:1px dashed #eee;
-    vertical-align:middle;
-  }
-  .voice-top{
-    position:absolute;
-    right:12px;
-    top:12px;
-    display:flex;
-    gap:8px;
-  }
-  .speak-line{
-    margin-top:8px;
-    padding:8px;
-    border-radius:10px;
-    background:#f6fbff;
-    font-size:15px;
-    min-height:40px;
-  }
-  /* chip colors */
-  .c-app{background:#1976d2;}
-  .c-food{background:#ff9800; color:#2b2b2b;}
-  .c-ride{background:#fbc02d; color:#2b2b2b;}
-  .c-auto{background:#d32f2f;}
-  .c-moto{background:#7b1fa2;}
-  .c-peat{background:#2e7d32;}
-  @media (max-width:600px){
-    .grid3{grid-template-columns:repeat(3,1fr);}
-    .qr img{width:180px;height:180px;}
-  }
-  input[type="text"], input[type="number"], #claveCasa, #telefono, #nombrePersona{
-    font-size:1.2rem;
-    padding:10px;
-  }
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background:#f3f7fb;
+  margin:0;
+  padding:0;
+}
+.wrap{
+  max-width:700px;
+  margin:20px auto;
+  padding:16px;
+}
+.card{
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,.08);
+}
+h1{
+  text-align:center;
+  color:#6a1b9a;
+}
+label{
+  display:block;
+  margin-top:12px;
+  font-weight:600;
+}
+input, button{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+button{
+  background:#6a1b9a;
+  color:#fff;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+}
+button:disabled{
+  opacity:.6;
+}
+.msg{
+  margin-top:12px;
+  text-align:center;
+}
+.qr img{
+  display:block;
+  margin:12px auto;
+  width:220px;
+}
 </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card" id="appCard">
-      <div style="position:relative;">
-        <h1>🔐 VISITASULQ — Control de Acceso QR</h1>
-        <div class="voice-top">
-          <button id="btnStartAssistant" class="btn-secondary" onclick="iniciarAsistente()">🎤 Asistente</button>
-          <button id="btnStopAssistant" class="btn-secondary hidden" onclick="detenerAsistente()">⏹ Detener</button>
-        </div>
-      </div>
+<div class="wrap">
+  <div class="card">
+    <h1>🔐 VISITASULQ</h1>
 
-      <!-- 1 CLAVE -->
-      <label class="small">1️⃣ Clave Casa</label>
-      <input id="claveCasa" placeholder="Ej. VIOLETAS8" autocomplete="off">
+    <label>Clave Casa</label>
+    <input id="claveCasa" placeholder="VIOLETAS8">
 
-      <!-- 2 MOTIVO -->
-      <label class="small">2️⃣ Motivo de visita</label>
-      <div class="grid3" id="motRow">
-        <div class="chip c-app" data-m="APP" onclick="pickMotivo(this)">📱 App</div>
-        <div class="chip c-food" data-m="COMIDA" onclick="pickMotivo(this)">🍔 Comida</div>
-        <div class="chip c-ride" data-m="VIAJE" onclick="pickMotivo(this)">🚕 Viaje</div>
-        <div class="chip c-auto" data-m="AUTO" onclick="pickMotivo(this)">🚗 Auto</div>
-        <div class="chip c-moto" data-m="MOTO" onclick="pickMotivo(this)">🏍 Moto</div>
-        <div class="chip c-peat" data-m="PEATONAL" onclick="pickMotivo(this)">🚶 Peatonal</div>
-      </div>
+    <label>Motivo</label>
+    <input id="motivo" placeholder="COMIDA / AUTO / MOTO">
 
-      <!-- NOMBRE (condicional) -->
-      <div id="divNombre" class="hidden">
-        <label class="small">Nombre persona</label>
-        <input id="nombrePersona" placeholder="Nombre (solo nombre)">
-      </div>
+    <label>Duración</label>
+    <input id="duracion" placeholder="15m / 30m / 1h / 24h">
 
-      <!-- 3 DURACIÓN -->
-      <label class="small">3️⃣ Duración (seleccione siempre)</label>
-      <div class="grid3" id="durRow">
-        <div class="dur d-15" data-d="15m" onclick="pickDur(this)">⏱ 15 min</div>
-        <div class="dur d-30" data-d="30m" onclick="pickDur(this)">⏱ 30 min</div>
-        <div class="dur d-1" data-d="1h" onclick="pickDur(this)">⏱ 1 hr</div>
-        <div class="dur d-24" data-d="24h" onclick="pickDur(this)">⏱ 24 hrs</div>
-        <div class="dur d-otro" data-d="otro" onclick="pickDur(this)">📅 Otro día</div>
-        <div class="dur d-blank" style="visibility:hidden"></div>
-      </div>
+    <label>Nombre (opcional)</label>
+    <input id="nombre">
 
-      <!-- Otro día: fecha + subduración -->
-      <div id="divOtro" class="hidden" style="margin-top:8px;">
-        <label class="small">Selecciona día y hora (solo futuro)</label>
-        <input id="fechaOtro" type="datetime-local">
-        <div style="margin-top:8px;">
-          <label class="small">Luego elige duración</label>
-          <div class="grid3" style="margin-top:6px;">
-            <div class="dur" data-sub="15m" onclick="pickSubDur(this)">⏱ 15 min</div>
-            <div class="dur" data-sub="30m" onclick="pickSubDur(this)">⏱ 30 min</div>
-            <div class="dur" data-sub="1h" onclick="pickSubDur(this)">⏱ 1 hr</div>
-            <div class="dur" data-sub="24h" onclick="pickSubDur(this)">⏱ 24 hrs</div>
-          </div>
-        </div>
-        <div id="msgFecha" class="msg"></div>
-      </div>
+    <label>Teléfono (opcional)</label>
+    <input id="telefono">
 
-      <!-- Texto reconocido del usuario -->
-      <div id="speakLine" class="speak-line" aria-live="polite"></div>
+    <button onclick="generar()">GENERAR CÓDIGO</button>
 
-      <!-- Generar -->
-      <button id="btnGenerar" class="btn-primary" onclick="onGenerar()">🎫 GENERAR CÓDIGO</button>
+    <div id="msg" class="msg"></div>
 
-      <div id="msg" class="msg"></div>
-
-      <!-- Resultado -->
-      <div id="resultado" class="hidden" style="margin-top:10px;">
-        <div id="qrBox" class="qr"></div>
-        <div id="codigoText" style="font-weight:900; margin-top:8px; font-size:18px; text-align:center;"></div>
-
-        <!-- TELEFONO -->
-        <div id="divTelefono" class="hidden" style="margin-top:10px;">
-          <label class="small">Teléfono</label>
-          <input id="telefono" placeholder="Número con LADA sin + (ej. 525512345678)">
-          <div style="margin-top:10px;">
-            <button id="btnWhats" class="btn-whatsapp hidden" onclick="enviarWhatsApp()">ENVIAR POR WHATSAPP</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:12px; text-align:center;">
-        <button id="btnGenerarOtro" class="btn-morado hidden" onclick="resetUI()">🔄 Generar otro</button>
-      </div>
-
-      <!-- Lista activos -->
-      <div id="listaActivos" class="codes-table"></div>
-    </div>
+    <div id="resultado" class="qr"></div>
   </div>
+</div>
 
 <script>
-/* ========= Estado ========= */
-let motivo = "";
-let duracion = "";
-let subDur = "";
-let currentCodigo = "", currentQr = "", currentExpira = "", currentMotivo = "", currentNombre = "";
-const motivosConNombre = ["AUTO","MOTO","PEATONAL"];
-const motivosRequierenTelefono = ["AUTO","MOTO","PEATONAL"];
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbw69mJgL_rghF6T8fXD0TsJDiyH-GCb0bZz2Iky6Z30_YkNbqTEgy6zpIms2U-PfocU/exec";
 
-/* Speech (TTS) y Recognition */
-let recog = null;
-let listening = false;
-let pasoVoz = 0; // 0=clave,1=motivo,2=nombre,3=dur,4=subdur/fecha,5=telefono,99=listo
-let vozDatos = { clave:"", motivo:"", nombre:"", duracion:"", extraDur:"", fechaOtroISO:"", telefono:"" };
-let autoGenerating = false;
-
-/* Helpers */
-function stripEmojis(s){
-  if(!s) return "";
-  return s.replace(/[\u{1F300}-\u{1FAFF}\u{1F000}-\u{1FFFF}]/gu,"");
-}
-function setMinFechaOtro(){
-  const input = document.getElementById("fechaOtro");
-  if(!input) return;
-  const now = new Date();
-  const tzOffset = now.getTimezoneOffset()*60000;
-  const localISO = new Date(now - tzOffset).toISOString().slice(0,16);
-  input.min = localISO;
-}
-function showRecognized(text){
-  // SOLO se utilizará para mostrar lo que dijo el usuario o acciones,
-  // ya NO lo usamos dentro de speakPrompt para evitar mostrar texto del asistente.
-  document.getElementById("speakLine").textContent = stripEmojis(text || "");
-}
-
-/* Speak then listen: el asistente habla y solo AL FINAL activamos reconocimiento */
-function speakPrompt(prompt, onEndStartListening){
-  try {
-    // Parar reconocimiento para que NO escuche al asistente
-    if(recog){
-      try{ recog.stop(); }catch(e){}
-    }
-    // Cancelar cualquier TTS previo
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(prompt);
-    u.lang = "es-MX";
-    u.rate = 1;
-    // NO actualizamos speakLine con el texto del asistente
-    u.onend = ()=> {
-      if(typeof onEndStartListening === "function"){
-        onEndStartListening();
-      }
-    };
-    window.speechSynthesis.speak(u);
-  } catch(e){
-    // Si falla TTS, igual iniciamos escucha
-    if(typeof onEndStartListening === "function"){
-      onEndStartListening();
-    }
-  }
-}
-
-/* Init recognition (una sola instancia) */
-function initRecognition(){
-  if(recog) return recog;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR) return null;
-  recog = new SR();
-  recog.lang = 'es-MX';
-  recog.interimResults = false;
-  recog.maxAlternatives = 1;
-
-  recog.onstart = ()=> {
-    listening = true;
-    document.getElementById("btnStartAssistant").classList.add("hidden");
-    document.getElementById("btnStopAssistant").classList.remove("hidden");
-  };
-  recog.onend = ()=> {
-    listening = false;
-    document.getElementById("btnStartAssistant").classList.remove("hidden");
-    document.getElementById("btnStopAssistant").classList.add("hidden");
-    // NO reiniciamos automáticamente. El flujo es guiado por speakPrompt.
-  };
-  recog.onerror = (e) => {
-    console.warn("Speech error", e);
-    if(e && (e.error === 'not-allowed' || e.error === 'service-not-allowed')){
-      alert("Permiso de micrófono denegado. Revisa permisos del navegador.");
-    }
-  };
-  recog.onresult = (ev) => {
-    const text = ev.results[0][0].transcript.trim();
-    // Aquí sí mostramos lo que DIJO EL USUARIO
-    showRecognized(text);
-    procesarVoz(text);
-  };
-  return recog;
-}
-
-/* iniciar asistente: habla la primera instrucción y después escucha (modo guiado) */
-function iniciarAsistente(){
-  const r = initRecognition();
-  if(!r){
-    alert("Reconocimiento de voz no soportado en este navegador. Usa Chrome/Edge.");
-    return;
-  }
-  // Reset flujo
-  pasoVoz = 0;
-  vozDatos = { clave:"", motivo:"", nombre:"", duracion:"", extraDur:"", fechaOtroISO:"", telefono:"" };
-
-  speakPrompt("Di la clave de la casa.", ()=> {
-    try{ r.start(); } catch(e){
-      setTimeout(()=>{ try{ r.start(); }catch(e2){} },200);
-    }
-  });
-}
-
-/* detener asistente */
-function detenerAsistente(){
-  if(!recog) return;
-  try{ recog.stop(); }catch(e){}
-  window.speechSynthesis.cancel();
-  document.getElementById("btnStartAssistant").classList.remove("hidden");
-  document.getElementById("btnStopAssistant").classList.add("hidden");
-}
-
-/* Procesar entrada de voz y mapear a UI (flujo paso a paso) */
-function procesarVoz(raw){
-  const frase = (raw||"").toUpperCase();
-
-  if(pasoVoz === 0){
-    const clave = frase.replace(/\s+/g,'');
-    if(clave){
-      vozDatos.clave = clave;
-      document.getElementById("claveCasa").value = clave;
-      pasoVoz = 1;
-      speakPrompt("Clave registrada. Di el motivo: Comida, Viaje, Auto, Moto, Peatonal o App.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    } else {
-      speakPrompt("No escuché la clave. Repite la clave de la casa.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    }
-  }
-
-  if(pasoVoz === 1){
-    const known = ["APP","APLICACION","COMIDA","VIAJE","AUTO","VEHICULO","MOTO","PEATONAL"];
-    let found = null;
-    for(const k of known){
-      if(frase.includes(k)){ found = k; break; }
-    }
-    if(found){
-      let map = found;
-      if(map==="APLICACION") map="APP";
-      if(map==="VEHICULO")   map="AUTO";
-      vozDatos.motivo = map;
-      motivo = map;
-
-      // activar chip correspondiente
-      document.querySelectorAll("#motRow .chip").forEach(c =>
-        c.classList.toggle("active", c.dataset.m === map)
-      );
-      // nombre y teléfono condicional
-      if(motivosConNombre.includes(map)){
-        document.getElementById("divNombre").classList.remove("hidden");
-      } else {
-        document.getElementById("divNombre").classList.add("hidden");
-        document.getElementById("nombrePersona").value = "";
-        vozDatos.nombre = "";
-      }
-      if(motivosRequierenTelefono.includes(map)){
-        document.getElementById("divTelefono").classList.remove("hidden");
-      } else {
-        document.getElementById("divTelefono").classList.add("hidden");
-      }
-
-      pasoVoz = motivosConNombre.includes(map) ? 2 : 3;
-      if(pasoVoz === 2){
-        speakPrompt("Motivo registrado. Di el nombre de la persona.", ()=>{ try{ recog.start(); }catch(e){} });
-      } else {
-        speakPrompt("Motivo registrado. Di la duración: 15 minutos, 30 minutos, 1 hora, 24 horas o Otro.", ()=>{ try{ recog.start(); }catch(e){} });
-      }
-      return;
-    } else {
-      speakPrompt("No entendí el motivo. Di: Comida, Viaje, Auto, Moto, Peatonal o App.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    }
-  }
-
-  if(pasoVoz === 2){
-    const name = frase.split(/\s+/).slice(0,3).join(' ');
-    if(name){
-      vozDatos.nombre = name;
-      document.getElementById("nombrePersona").value = name;
-      pasoVoz = 3;
-      speakPrompt("Nombre registrado. Di la duración: 15 minutos, 30 minutos, 1 hora, 24 horas o Otro.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    } else {
-      speakPrompt("No entendí el nombre. Repite el nombre, por favor.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    }
-  }
-
-  if(pasoVoz === 3){
-    if(frase.includes("15")){ vozDatos.duracion="15m"; duracion="15m"; }
-    else if(frase.includes("30")){ vozDatos.duracion="30m"; duracion="30m"; }
-    else if(frase.includes("1 HORA")||frase.includes("UNA HORA")){ vozDatos.duracion="1h"; duracion="1h"; }
-    else if(frase.includes("24")||frase.includes("VEINTICUATRO")){ vozDatos.duracion="24h"; duracion="24h"; }
-    else if(frase.includes("OTRO")){ vozDatos.duracion="otro"; duracion="otro"; }
-    else {
-      speakPrompt("No entendí la duración. Di: 15 minutos, 30 minutos, 1 hora, 24 horas o Otro.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    }
-
-    // activar UI
-    document.querySelectorAll("#durRow .dur").forEach(d =>
-      d.classList.toggle("active", d.dataset.d === duracion)
-    );
-    if(vozDatos.duracion === "otro"){
-      document.getElementById("divOtro").classList.remove("hidden");
-      setMinFechaOtro();
-      pasoVoz = 4;
-      speakPrompt("Elegiste otro día. Selecciona fecha en pantalla o di la subduración: 15 minutos, 30 minutos, 1 hora o 24 horas.", ()=>{ try{ recog.start(); }catch(e){} });
-    } else {
-      pasoVoz = motivosRequierenTelefono.includes(vozDatos.motivo) ? 5 : 99;
-      speakPrompt("Duración registrada." + (pasoVoz===5 ? " Di el teléfono." : " Generaré el código automáticamente."), ()=>{ try{ recog.start(); }catch(e){} });
-      if(pasoVoz === 99) tryAutoGenerate();
-    }
-    return;
-  }
-
-  if(pasoVoz === 4){
-    if(frase.includes("15")){ vozDatos.extraDur="15m"; subDur="15m"; }
-    else if(frase.includes("30")){ vozDatos.extraDur="30m"; subDur="30m"; }
-    else if(frase.includes("1 HORA")||frase.includes("UNA HORA")){ vozDatos.extraDur="1h"; subDur="1h"; }
-    else if(frase.includes("24")||frase.includes("VEINTICUATRO")){ vozDatos.extraDur="24h"; subDur="24h"; }
-    else {
-      speakPrompt("No entendí la subduración. Di: 15 minutos, 30 minutos, 1 hora o 24 horas.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    }
-
-    vozDatos.fechaOtroISO = document.getElementById("fechaOtro").value || "";
-    pasoVoz = motivosRequierenTelefono.includes(vozDatos.motivo) ? 5 : 99;
-    speakPrompt("Subduración registrada." + (pasoVoz===5 ? " Di el teléfono." : " Generaré el código automáticamente."), ()=>{ try{ recog.start(); }catch(e){} });
-    if(pasoVoz === 99) tryAutoGenerate();
-    return;
-  }
-
-  if(pasoVoz === 5){
-    const digits = frase.replace(/\D/g,'');
-    if(digits.length < 7){
-      speakPrompt("El número parece corto. Di el número completo con lada.", ()=>{ try{ recog.start(); }catch(e){} });
-      return;
-    }
-    vozDatos.telefono = digits;
-    document.getElementById("telefono").value = digits;
-    pasoVoz = 99;
-    speakPrompt("Teléfono recibido. Generando código automáticamente.", ()=>{ /* ya no reescuchamos aquí */ });
-    tryAutoGenerate();
-    return;
-  }
-
-  if(pasoVoz >= 99){
-    showRecognized("Todo listo. Puedes generar manualmente o esperar el código.");
-    tryAutoGenerate();
-  }
-}
-
-/* Intentar generar automáticamente cuando todos los datos estén listos */
-function tryAutoGenerate(){
-  if(autoGenerating) return;
-  const clave = (document.getElementById("claveCasa").value||"").trim();
-  if(!clave) return;
-  const mot = vozDatos.motivo || motivo;
-  if(!mot) return;
-  const dur = vozDatos.duracion || duracion;
-  if(!dur) return;
-
-  if(motivosConNombre.includes(mot)){
-    if(!(document.getElementById("nombrePersona").value || vozDatos.nombre)) return;
-  }
-  if(dur === "otro"){
-    const fechaVal = document.getElementById("fechaOtro").value || vozDatos.fechaOtroISO;
-    if(!fechaVal || !(vozDatos.extraDur || subDur)) return;
-  }
-  if(motivosRequierenTelefono.includes(mot)){
-    if(!(document.getElementById("telefono").value || vozDatos.telefono)) return;
-  }
-
-  autoGenerating = true;
+function generar(){
   const payload = {
-    claveCasa: clave,
-    motivo: mot,
-    duracion: dur,
-    fechaOtroISO: dur === "otro" ? (document.getElementById("fechaOtro").value || vozDatos.fechaOtroISO || null) : null,
-    extraDur: dur === "otro" ? (vozDatos.extraDur || subDur) : subDur,
-    nombre: document.getElementById("nombrePersona").value.trim() || vozDatos.nombre || "",
-    telefono: (document.getElementById("telefono").value.trim() || vozDatos.telefono || "")
-  };
-
-  bloquearUIAntesGenerar();
-  document.getElementById("msg").textContent = "Generando código automáticamente...";
-  google.script.run.withSuccessHandler(res=>{
-    autoGenerating = false;
-    if(!res || !res.ok){
-      desbloquearUIDespuesFallo();
-      document.getElementById("msg").textContent = (res && res.message) ? res.message : "Error al generar";
-      return;
-    }
-    mostrarResultado(res, payload);
-    // detener asistente para evitar duplicados
-    try{ if(recog) recog.stop(); }catch(e){}
-    window.speechSynthesis.cancel();
-  }).generarCodigoWeb(payload);
-}
-
-/* UI helpers para bloquear/desbloquear controles antes/después de generar */
-function bloquearUIAntesGenerar(){
-  document.querySelectorAll("#motRow .chip, #durRow .dur, #divOtro .dur").forEach(el => {
-    el.classList.add("disabled");
-    el.style.pointerEvents = "none";
-  });
-  document.getElementById("claveCasa").disabled = true;
-  document.getElementById("nombrePersona").disabled = true;
-  // Teléfono NO se deshabilita
-  document.getElementById("btnGenerar").disabled = true;
-  document.getElementById("btnGenerar").classList.add("disabled");
-}
-function desbloquearUIDespuesFallo(){
-  document.querySelectorAll("#motRow .chip, #durRow .dur, #divOtro .dur").forEach(el => {
-    el.classList.remove("disabled");
-    el.style.pointerEvents = "auto";
-  });
-  document.getElementById("claveCasa").disabled = false;
-  document.getElementById("nombrePersona").disabled = false;
-  document.getElementById("btnGenerar").disabled = false;
-  document.getElementById("btnGenerar").classList.remove("disabled");
-}
-
-/* Mostrar resultado y dejar solo botones Generar otro + WhatsApp activos (teléfono editable) */
-function mostrarResultado(res, payload){
-  currentCodigo = res.codigo || "";
-  currentQr = res.qr || "";
-  currentExpira = res.expiracion || "";
-  currentMotivo = payload.motivo || "";
-  currentNombre = payload.nombre || "";
-
-  document.getElementById("resultado").classList.remove("hidden");
-  document.getElementById("qrBox").innerHTML = `<img src="${currentQr}" alt="qr">`;
-  document.getElementById("codigoText").textContent = currentCodigo;
-
-  document.getElementById("btnWhats").classList.remove("hidden");
-  document.getElementById("divTelefono").classList.remove("hidden");
-
-  // bloquear todo excepto teléfono, Generar Otro y WhatsApp
-  document.querySelectorAll("#motRow .chip, #durRow .dur, #divOtro .dur").forEach(el => {
-    el.classList.add("disabled");
-    el.style.pointerEvents = "none";
-  });
-  document.getElementById("claveCasa").disabled = true;
-  document.getElementById("nombrePersona").disabled = true;
-  // Teléfono sigue habilitado
-  document.getElementById("telefono").disabled = false;
-
-  document.getElementById("btnGenerar").style.display = "none";
-  document.getElementById("btnGenerarOtro").classList.remove("hidden");
-
-  document.getElementById("msg").textContent = "Código generado. Expira: " + currentExpira;
-
-  cargarActivos();
-}
-
-/* ========== UI picks (botones) ========== */
-function pickMotivo(el){
-  if(el.classList.contains("disabled")) return;
-  document.querySelectorAll("#motRow .chip").forEach(c => c.classList.remove("active"));
-  el.classList.add("active");
-  motivo = el.dataset.m;
-  if(motivosConNombre.includes(motivo)){
-    document.getElementById("divNombre").classList.remove("hidden");
-  } else {
-    document.getElementById("divNombre").classList.add("hidden");
-    document.getElementById("nombrePersona").value = "";
-  }
-  if(motivosRequierenTelefono.includes(motivo)){
-    document.getElementById("divTelefono").classList.remove("hidden");
-  } else {
-    document.getElementById("divTelefono").classList.add("hidden");
-  }
-  showRecognized("Motivo seleccionado: " + motivo);
-}
-
-function pickDur(el){
-  if(el.classList.contains("disabled")) return;
-  document.querySelectorAll("#durRow .dur").forEach(d => d.classList.remove("active"));
-  el.classList.add("active");
-  duracion = el.dataset.d;
-  if(duracion === "otro"){
-    document.getElementById("divOtro").classList.remove("hidden");
-    setMinFechaOtro();
-  } else {
-    document.getElementById("divOtro").classList.add("hidden");
-    subDur = "";
-  }
-  showRecognized("Duración seleccionada: " + el.textContent);
-}
-
-function pickSubDur(el){
-  if(el.classList.contains("disabled")) return;
-  document.querySelectorAll("#divOtro .dur").forEach(d => d.classList.remove("active"));
-  el.classList.add("active");
-  subDur = el.dataset.sub;
-  showRecognized("Duración del día: " + el.textContent);
-}
-
-/* ========== Generación manual (botón) ========== */
-function showMsg(text, err){
-  const m = document.getElementById("msg");
-  m.textContent = text || "";
-  m.classList.toggle('err', !!err);
-}
-function onGenerar(){
-  if(autoGenerating) return;
-  autoGenerating = true;
-
-  const payload = {
+    accion: "generarCodigo",
     claveCasa: document.getElementById("claveCasa").value.trim(),
-    motivo: motivo || vozDatos.motivo || "",
-    duracion: duracion || vozDatos.duracion || "",
-    fechaOtroISO: (duracion === "otro") ? document.getElementById("fechaOtro").value : null,
-    extraDur: subDur || "",
-    nombre: document.getElementById("nombrePersona").value.trim() || "",
-    telefono: document.getElementById("telefono").value.trim() || ""
+    motivo: document.getElementById("motivo").value.trim(),
+    duracion: document.getElementById("duracion").value.trim(),
+    nombre: document.getElementById("nombre").value.trim(),
+    telefono: document.getElementById("telefono").value.trim()
   };
 
   document.getElementById("msg").textContent = "Generando código...";
 
-  fetch("https://script.google.com/macros/s/AKfycbyB5B61Px_GWRnnya3ChezHcUhoAccghjHIcQf_VOvBfFUw3mSfrmmuWTejX39oTkUV/exec", {
+  fetch(ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      accion: "generarCodigo",
-      ...payload
-    })
+    body: JSON.stringify(payload)
   })
   .then(r => r.json())
   .then(res => {
     console.log("RESPUESTA:", res);
-    autoGenerating = false;
-
     if(res.ok){
-      mostrarResultado(res, payload);
+      document.getElementById("msg").textContent = "Código generado";
+      document.getElementById("resultado").innerHTML =
+        `<img src="${res.qr}"><div style="text-align:center;font-weight:800">${res.codigo}</div>`;
     } else {
       document.getElementById("msg").textContent = res.message || "Error al generar";
     }
   })
   .catch(err => {
-    autoGenerating = false;
-    console.error("ERROR FETCH:", err);
+    console.error(err);
     document.getElementById("msg").textContent = "Error de conexión";
   });
 }
-
-/* enviar WhatsApp */
-function enviarWhatsApp(){
-  if(!currentCodigo){ showMsg("No hay código generado", true); return; }
-  const nombrePara = currentNombre ? `Nombre: ${currentNombre}\n` : "";
-  const mensaje = `Acceso generado:\nCódigo: ${currentCodigo}\nMotivo: ${currentMotivo}\n${nombrePara}Expira: ${currentExpira}\nQR: ${currentQr}`;
-  const tel = document.getElementById("telefono").value.trim();
-  let url;
-  if(tel){
-    const digits = tel.replace(/\D/g,'');
-    url = "https://wa.me/" + encodeURIComponent(digits) + "?text=" + encodeURIComponent(mensaje);
-  } else {
-    url = "https://wa.me/?text=" + encodeURIComponent(mensaje);
-  }
-  window.open(url, "_blank");
-}
-
-/* reset UI para generar otro (habilita todo de nuevo) */
-function resetUI(){
-  motivo = ""; duracion = ""; subDur = "";
-  currentCodigo = ""; currentQr = ""; currentExpira = ""; currentMotivo = ""; currentNombre = "";
-  pasoVoz = 0;
-  vozDatos = { clave:"", motivo:"", nombre:"", duracion:"", extraDur:"", fechaOtroISO:"", telefono:"" };
-  autoGenerating = false;
-
-  document.getElementById("claveCasa").value = "";
-  document.getElementById("nombrePersona").value = "";
-  document.getElementById("fechaOtro").value = "";
-  document.getElementById("telefono").value = "";
-
-  document.getElementById("claveCasa").disabled = false;
-  document.getElementById("nombrePersona").disabled = false;
-  document.getElementById("telefono").disabled = false;
-
-  document.querySelectorAll("#motRow .chip, #durRow .dur, #divOtro .dur").forEach(el => {
-    el.classList.remove("active","disabled");
-    el.style.pointerEvents = "auto";
-  });
-  document.getElementById("divNombre").classList.add("hidden");
-  document.getElementById("divOtro").classList.add("hidden");
-  document.getElementById("resultado").classList.add("hidden");
-  document.getElementById("divTelefono").classList.add("hidden");
-
-  document.getElementById("btnGenerar").style.display = "block";
-  document.getElementById("btnGenerar").disabled = false;
-  document.getElementById("btnGenerar").classList.remove("disabled");
-  document.getElementById("btnGenerarOtro").classList.add("hidden");
-  document.getElementById("btnWhats").classList.add("hidden");
-  showMsg("");
-  setMinFechaOtro();
-  document.getElementById("listaActivos").innerHTML = "<div class='msg'>Ingresa CLAVE CASA para ver códigos válidos</div>";
-  document.getElementById("speakLine").textContent = "";
-}
-
-/* Cargar lista de activos (sheet) */
-let timer = null;
-function cargarActivosDebounced(){
-  clearTimeout(timer);
-  timer = setTimeout(cargarActivos, 700);
-}
-document.getElementById("claveCasa").addEventListener("input", e=>{
-  e.target.value = e.target.value.toUpperCase();
-  cargarActivosDebounced();
-});
-
-function cargarActivos(){
-  const clave = document.getElementById("claveCasa").value.trim();
-  const cont = document.getElementById("listaActivos");
-  if(!clave){
-    cont.innerHTML = "<div class='msg'>Ingresa CLAVE CASA para ver códigos válidos</div>";
-    return;
-  }
-  google.script.run.withSuccessHandler(list=>{
-    renderActivos(list || []);
-  }).consultarCodigosActivos(clave);
-}
-
-function renderActivos(list){
-  const cont = document.getElementById("listaActivos");
-  if(!list || list.length === 0){
-    cont.innerHTML = "<div class='msg'>No hay códigos válidos</div>";
-    return;
-  }
-  let html = "<div class='codes-table'><table><thead><tr><th style='width:40%'>CÓDIGO</th><th style='width:22%'>MOTIVO</th><th style='width:18%'>NOMBRE</th><th style='width:12%'>EXPIRA</th><th style='width:8%'></th></tr></thead><tbody>";
-  list.forEach(r=>{
-    html += `<tr>
-      <td>
-        <span onclick="reusarCodigo('${(r.codigo||'').replace(/'/g,"\\'")}',
-                                   '${(r.motivo||'').replace(/'/g,"\\'")}',
-                                   '${(r.nombre||'').replace(/'/g,"\\'")}',
-                                   '${(r.expira||'').replace(/'/g,"\\'") }')"
-              style="color:${getComputedStyle(document.documentElement).getPropertyValue('--primary')};
-                     font-weight:800;cursor:pointer;text-decoration:underline;">
-          ${r.codigo}
-        </span>
-      </td>
-      <td>${r.motivo||''}</td>
-      <td>${r.nombre||''}</td>
-      <td>${r.expira||''}</td>
-      <td><button class="btn-danger" onclick="eliminarCodigo('${(r.codigo||'').replace(/'/g,"\\'")}')">ELIMINAR</button></td>
-    </tr>`;
-  });
-  html += "</tbody></table></div>";
-  cont.innerHTML = html;
-}
-
-function reusarCodigo(codigo, motivoArg, nombre, expira){
-  currentCodigo = codigo;
-  currentMotivo = motivoArg;
-  currentNombre = nombre;
-  currentExpira = expira;
-  currentQr = "https://quickchart.io/qr?text=" + encodeURIComponent(codigo) + "&size=300";
-
-  document.getElementById("resultado").classList.remove("hidden");
-  document.getElementById("qrBox").innerHTML = `<img src="${currentQr}" alt="qr">`;
-  document.getElementById("codigoText").textContent = codigo;
-  document.getElementById("btnWhats").classList.remove("hidden");
-
-  if(motivosRequierenTelefono.includes(motivoArg)){
-    document.getElementById("divTelefono").classList.remove("hidden");
-    document.getElementById("telefono").value = nombre || "";
-  } else {
-    document.getElementById("divTelefono").classList.add("hidden");
-  }
-
-  // bloquear todo menos teléfono, boton otro y whatsapp
-  document.querySelectorAll("#motRow .chip, #durRow .dur, #divOtro .dur").forEach(el => {
-    el.classList.add("disabled");
-    el.style.pointerEvents = "none";
-  });
-  document.getElementById("btnGenerar").style.display = "none";
-  document.getElementById("btnGenerarOtro").classList.remove("hidden");
-  document.getElementById("claveCasa").disabled = true;
-  document.getElementById("nombrePersona").disabled = true;
-  document.getElementById("telefono").disabled = false;
-
-  showRecognized("Código cargado. Expira " + expira);
-}
-
-function eliminarCodigo(code){
-  google.script.run.withSuccessHandler(r=>{
-    if(r && r.ok){
-      showMsg("Código marcado como CADUCADO");
-      cargarActivos();
-    } else {
-      showMsg("No se pudo caducar", true);
-    }
-  }).marcarCodigoCaducado(code);
-}
-
-/* Inicialización */
-setMinFechaOtro();
-cargarActivos();
-
 </script>
 </body>
 </html>
