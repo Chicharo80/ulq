@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VISITASULQ</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#6a1b9a">
-
 <style>
 body{
   font-family: Arial, Helvetica, sans-serif;
@@ -51,57 +48,38 @@ button{
   <input id="nombre" placeholder="Nombre (opcional)">
   <input id="telefono" placeholder="Teléfono (opcional)">
 
-  <button id="btn">GENERAR CÓDIGO</button>
+  <button onclick="generar()">GENERAR CÓDIGO</button>
 
   <div id="msg" class="msg"></div>
   <div id="res" class="qr"></div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-// ⚠️ ESTA ES LA ÚNICA URL QUE FUNCIONA DESDE GITHUB PAGES
 const API_URL =
 "https://script.googleusercontent.com/macros/echo?lib=AKfycbzUWow7v0hJ5SnyL0z64oNtDIolyuGMN4jCwwTaU1KR5gLUMwelVlZ5_3YkhNe3tzYz";
-
-/* ================= DOM ================= */
-const msg = document.getElementById("msg");
-const res = document.getElementById("res");
-const claveCasa = document.getElementById("claveCasa");
-const motivo = document.getElementById("motivo");
-const duracion = document.getElementById("duracion");
-const nombre = document.getElementById("nombre");
-const telefono = document.getElementById("telefono");
-const btn = document.getElementById("btn");
-
-/* ================= LOGICA ================= */
-btn.addEventListener("click", generar);
 
 async function generar(){
   msg.textContent = "Generando...";
   res.innerHTML = "";
 
-  const payload = {
-    action: "guardar",
-    claveCasa: claveCasa.value.trim(),
-    motivo: motivo.value.trim(),
-    duracion: duracion.value.trim(),
-    nombre: nombre.value.trim(),
-    telefono: telefono.value.trim()
-  };
-
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
+  try{
+    const payload = JSON.stringify({
+      action:"guardar",
+      claveCasa: claveCasa.value.trim(),
+      motivo: motivo.value.trim(),
+      duracion: duracion.value.trim(),
+      nombre: nombre.value.trim(),
+      telefono: telefono.value.trim()
     });
 
-    const data = await response.json();
-    console.log("RESPUESTA API:", data);
+    const r = await fetch(API_URL,{
+      method:"POST",
+      body: payload   // 👈 SIN headers
+    });
 
-    if (!data.ok) {
+    const data = JSON.parse(await r.text());
+
+    if(!data.ok){
       msg.textContent = data.message || "Error";
       return;
     }
@@ -109,13 +87,12 @@ async function generar(){
     msg.textContent = "Código generado";
     res.innerHTML = `
       <img src="${data.qr}">
-      <div style="font-weight:800;text-align:center">${data.codigo}</div>
+      <div style="text-align:center;font-weight:800">${data.codigo}</div>
       <div style="text-align:center">Expira: ${data.expiracion}</div>
     `;
-
-  } catch (err) {
-    console.error("ERROR FETCH:", err);
-    msg.textContent = "Error de conexión";
+  }catch(e){
+    msg.textContent = "❌ Error de conexión";
+    console.error("ERROR FETCH:", e);
   }
 }
 </script>
