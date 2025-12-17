@@ -58,7 +58,7 @@ button{
 </div>
 
 <script>
-const API_URL = "https://script.googleusercontent.com/macros/echo";
+const API_URL = "https://script.googleusercontent.com/macros/echo?lib=AKfycbxmweI2B_u6Y-cZJ6gzvlRcCAK7cIA2lBkjAXs3DrOtV5RKBv5DADHSTpciz7qB5bmM";
 
 async function generar(){
   msg.textContent = "Generando...";
@@ -73,16 +73,16 @@ async function generar(){
     telefono: telefono.value.trim()
   };
 
-  try{
-    const r = await fetch(API_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
+  try {
+    const r = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
     const data = await r.json();
 
-    if(!data.ok){
+    if (!data.ok) {
       msg.textContent = data.message || "Error";
       return;
     }
@@ -93,19 +93,16 @@ async function generar(){
       <div style="text-align:center;font-weight:800">${data.codigo}</div>
       <div style="text-align:center">Expira: ${data.expiracion}</div>
     `;
-  }catch(e){
+  } catch (e) {
+    console.error(e);
     msg.textContent = "Error de conexión";
   }
 }
 
 // registrar service worker
-if("serviceWorker" in navigator){
+if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 </body>
 </html>
-
-
-
-
