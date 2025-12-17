@@ -51,19 +51,19 @@ button{
   <input id="nombre" placeholder="Nombre (opcional)">
   <input id="telefono" placeholder="Teléfono (opcional)">
 
-  <button onclick="generar()">GENERAR CÓDIGO</button>
+  <button id="btn">GENERAR CÓDIGO</button>
 
   <div id="msg" class="msg"></div>
   <div id="res" class="qr"></div>
 </div>
 
 <script>
-/* ===== CONFIG ===== */
+/* ================= CONFIG ================= */
+// ⚠️ ESTA ES LA ÚNICA URL QUE FUNCIONA DESDE GITHUB PAGES
 const API_URL =
 "https://script.googleusercontent.com/macros/echo?lib=AKfycbzUWow7v0hJ5SnyL0z64oNtDIolyuGMN4jCwwTaU1KR5gLUMwelVlZ5_3YkhNe3tzYz";
 
-
-/* ===== REFERENCIAS DOM (OBLIGATORIO EN PWA) ===== */
+/* ================= DOM ================= */
 const msg = document.getElementById("msg");
 const res = document.getElementById("res");
 const claveCasa = document.getElementById("claveCasa");
@@ -71,8 +71,11 @@ const motivo = document.getElementById("motivo");
 const duracion = document.getElementById("duracion");
 const nombre = document.getElementById("nombre");
 const telefono = document.getElementById("telefono");
+const btn = document.getElementById("btn");
 
-/* ===== FUNCIÓN PRINCIPAL ===== */
+/* ================= LOGICA ================= */
+btn.addEventListener("click", generar);
+
 async function generar(){
   msg.textContent = "Generando...";
   res.innerHTML = "";
@@ -87,13 +90,15 @@ async function generar(){
   };
 
   try {
-    const r = await fetch(API_URL, {
+    const response = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(payload)
     });
 
-    const data = await r.json();
+    const data = await response.json();
     console.log("RESPUESTA API:", data);
 
     if (!data.ok) {
@@ -104,20 +109,15 @@ async function generar(){
     msg.textContent = "Código generado";
     res.innerHTML = `
       <img src="${data.qr}">
-      <div style="text-align:center;font-weight:800">${data.codigo}</div>
+      <div style="font-weight:800;text-align:center">${data.codigo}</div>
       <div style="text-align:center">Expira: ${data.expiracion}</div>
     `;
-  } catch (e) {
-    console.error("ERROR REAL:", e);
+
+  } catch (err) {
+    console.error("ERROR FETCH:", err);
     msg.textContent = "Error de conexión";
   }
-}
-
-/* ===== SERVICE WORKER ===== */
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 </body>
 </html>
-
