@@ -720,89 +720,44 @@ function showMsg(text, err){
 }
 function onGenerar(){
   if(autoGenerating) return;
-  showMsg("");
-  const clave = document.getElementById("claveCasa").value.trim();
-  if(!clave){ showMsg("Ingresa CLAVE CASA", true); return; }
-  if(!motivo && !vozDatos.motivo){ showMsg("Selecciona MOTIVO", true); return; }
-  if(!duracion && !vozDatos.duracion){ showMsg("Selecciona DURACIÓN", true); return; }
-
-  const mot = motivo || vozDatos.motivo;
-  const dur = duracion || vozDatos.duracion;
-
-  if(motivosConNombre.includes(mot)){
-    const nombre = document.getElementById("nombrePersona").value.trim();
-    if(!nombre){ showMsg("Ingresa NOMBRE", true); return; }
-  }
-  if(dur === "otro"){
-    const fechaVal = document.getElementById("fechaOtro").value;
-    if(!fechaVal){ showMsg("Selecciona fecha y hora", true); return; }
-    const sel = new Date(fechaVal);
-    if(isNaN(sel) || sel.getTime() < (new Date()).getTime()){
-      showMsg("La fecha no puede ser anterior a ahora", true); return;
-    }
-    if(!subDur){ showMsg("Selecciona duración para el día elegido", true); return; }
-  }
-  function onGenerar(){
+  autoGenerating = true;
 
   const payload = {
-    claveCasa: document.getElementById("claveCasa").value,
-    motivo: motivo,
-    duracion: duracion,
-    nombre: document.getElementById("nombrePersona").value,
-    telefono: document.getElementById("telefono").value
+    claveCasa: document.getElementById("claveCasa").value.trim(),
+    motivo: motivo || vozDatos.motivo || "",
+    duracion: duracion || vozDatos.duracion || "",
+    fechaOtroISO: (duracion === "otro") ? document.getElementById("fechaOtro").value : null,
+    extraDur: subDur || "",
+    nombre: document.getElementById("nombrePersona").value.trim() || "",
+    telefono: document.getElementById("telefono").value.trim() || ""
   };
 
   document.getElementById("msg").textContent = "Generando código...";
 
-  fetch("https://script.google.com/macros/s/AKfycbwRfOR_8cbQcrcYuTqDzp2UJs6tDlMuuri9bh0bNLJ6lajzURp1gTFqk7hA3_bP2wbo/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbyB5B61Px_GWRnnya3ChezHcUhoAccghjHIcQf_VOvBfFUw3mSfrmmuWTejX39oTkUV/exec", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ accion:"generarCodigo", ...payload })
+    body: JSON.stringify({
+      accion: "generarCodigo",
+      ...payload
+    })
   })
   .then(r => r.json())
   .then(res => {
+    console.log("RESPUESTA:", res);
+    autoGenerating = false;
+
     if(res.ok){
       mostrarResultado(res, payload);
     } else {
-      alert("Error al generar");
+      document.getElementById("msg").textContent = res.message || "Error al generar";
     }
   })
-  .catch(() => {
-    alert("Error de conexión");
+  .catch(err => {
+    autoGenerating = false;
+    console.error("ERROR FETCH:", err);
+    document.getElementById("msg").textContent = "Error de conexión";
   });
-.then(res => {
-  console.log("RESPUESTA SERVIDOR:", res);
-  if(res.ok){
-    mostrarResultado(res, payload);
-  } else {
-    alert(res.message || "Error al generar");
-  }
-})
-
-}
-
-
-  bloquearUIAntesGenerar();
-
-  const payload = {
-    claveCasa: clave,
-    motivo: mot,
-    duracion: dur,
-    fechaOtroISO: (dur === "otro") ? (document.getElementById("fechaOtro").value || null) : null,
-    extraDur: (dur === "otro") ? (subDur || "") : (subDur || ""),
-    nombre: document.getElementById("nombrePersona").value.trim() || vozDatos.nombre || "",
-    telefono: document.getElementById("telefono").value.trim() || vozDatos.telefono || ""
-  };
-
-  document.getElementById("msg").textContent = "Generando código...";
-  google.script.run.withSuccessHandler(res=>{
-    if(!res || !res.ok){
-      desbloquearUIDespuesFallo();
-      showMsg((res&&res.message)?res.message:"Error al generar", true);
-      return;
-    }
-    mostrarResultado(res, payload);
-  }).generarCodigoWeb(payload);
 }
 
 /* enviar WhatsApp */
@@ -961,4 +916,3 @@ cargarActivos();
 </script>
 </body>
 </html>
-
